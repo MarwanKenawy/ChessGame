@@ -29,15 +29,26 @@ public class Main {
 
         System.out.println("White in check: " + game.isKingInCheck(PieceColor.WHITE));
 
-        System.out.println("Black in check: " + game.isKingInCheck(PieceColor.BLACK));
+        System.out.println("Checkmate: " + game.isCheckmate());
 
-        System.out.println("Current Turn: " + game.getCurrentTurn());
+        System.out.println("Game Status: " + game.getGameStatus());
 
-        //try unrelated move while in check
-        try {
-            game.makeMove(new Position(6, 0), new Position(5, 0));
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
+        //try move after game ended
+        // try {
+        //     game.makeMove(new Position(6, 0), new Position(5, 0));
+        // } catch (IllegalArgumentException e) {
+        //     System.out.println(e.getMessage());
+        // }
+
+        ChessGame game2 = new ChessGame();
+
+        Position g1 = new Position(7, 6);
+
+        java.util.List<Position> moves = game2.getAllValidMovesFromSquare(g1);
+        System.out.println("Knight valid moves: " + moves.size());
+
+        for (Position move : moves) {
+            System.out.println("Row: " + move.getRow() + ", Col: " + move.getCol());
         }
     }
 

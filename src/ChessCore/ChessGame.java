@@ -3,10 +3,16 @@ package ChessCore;
 public class ChessGame {
     private final Board board;
     private PieceColor currentTurn;
+    private GameStatus gameStatus;
 
     public ChessGame(){
         board = new Board();
         currentTurn = PieceColor.WHITE;
+        gameStatus = GameStatus.IN_PROGRESS;
+    }
+
+    public GameStatus getGameStatus(){
+        return gameStatus;
     }
 
     public PieceColor getCurrentTurn(){
@@ -82,6 +88,11 @@ public class ChessGame {
     }
 
     public void makeMove(Position from, Position to){
+
+        if(gameStatus != GameStatus.IN_PROGRESS){
+            throw new IllegalStateException("Game already ended");
+        }
+
         if(!isValidMove(from, to)){
             throw new IllegalArgumentException("Invalid move");
         }
@@ -92,6 +103,12 @@ public class ChessGame {
         board.setPiece(from, null);
 
         currentTurn = currentTurn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+
+        if(isCheckmate()){
+            gameStatus = currentTurn == PieceColor.WHITE ? GameStatus.BLACK_WON : GameStatus.WHITE_WON;
+        }else if(isStalemate()){
+            gameStatus = GameStatus.STALEMATE;
+        }
     }
 
     private boolean isPathClear(Position from, Position to){
@@ -220,5 +237,58 @@ public class ChessGame {
         PieceColor opponent = color == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
 
         return isSquareAttacked(kingPosition, opponent);
+    }
+
+    public java.util.List<Position> getAllValidMovesFromSquare(Position from){
+
+        java.util.List<Position> validMoves = new java.util.ArrayList<>();
+
+        if(from == null){
+            return validMoves;
+        }
+
+        Piece piece = board.getPiece(from);
+
+        if(piece == null || piece.getColor() != currentTurn){
+            return validMoves;
+        }
+
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col < 8; col++){
+
+                Position to = new Position(row, col);
+
+                if(isValidMove(from, to)){
+                    validMoves.add(to);
+                }
+            }
+        }
+
+        return validMoves;
+    }
+
+    private boolean hasAnyValidMoves(){
+
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col < 8; col++){
+
+                Position from = new Position(row, col);
+
+                if(!getAllValidMovesFromSquare(from).isEmpty()){
+                    return true;
+                }
+
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isCheckmate(){
+        return isKingInCheck(currentTurn) && !hasAnyValidMoves();
+    }
+
+    public boolean isStalemate(){
+        return !isKingInCheck(currentTurn) && !hasAnyValidMoves();
     }
 }
