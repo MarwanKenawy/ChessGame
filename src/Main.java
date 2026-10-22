@@ -1,21 +1,38 @@
+import ChessCore.Bishop;
+import ChessCore.King;
+import ChessCore.Knight;
+import ChessCore.Pawn;
+import ChessCore.Piece;
 import ChessCore.PieceColor;
 import ChessCore.Position;
+import ChessCore.Queen;
 import ChessCore.Rook;
 
 public class Main {
     public static void main(String[] args){
-        Rook rook = new Rook(PieceColor.WHITE);
-
         Position from = new Position(4, 3);
 
-        Position move1 = new Position(4, 7); 
-        Position move2 = new Position(0, 3); 
-        Position move3 = new Position(6, 5); 
+        Piece[] pieces = {
+            new Rook(PieceColor.WHITE),
+            new Bishop(PieceColor.WHITE),
+            new Knight(PieceColor.WHITE),
+            new Queen(PieceColor.WHITE),
+            new King(PieceColor.WHITE),
+            new Pawn(PieceColor.WHITE)
+        };
 
-        System.out.println("Rook color: " + rook.getColor());
-        System.out.println("move1 : " + rook.isValidMove(from, move1));
-        System.out.println("move2 : " + rook.isValidMove(from, move2));
-        System.out.println("move3 : " + rook.isValidMove(from, move3));
+        Position[] destinations = {
+            new Position(4, 7),
+            new Position(1, 6),
+            new Position(2, 4),
+            new Position(1, 3),
+            new Position(3, 4),
+            new Position(3, 3),
+        };
+
+        for(int i = 0; i < pieces.length; i++){
+            System.out.println(pieces[i].getClass().getSimpleName() + ": " + pieces[i].isValidMove(from, destinations[i]));
+        }
     }
 
 }
