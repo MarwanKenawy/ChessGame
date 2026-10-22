@@ -14,32 +14,34 @@ public class Main {
     public static void main(String[] args){
         ChessGame game = new ChessGame();
 
-        System.out.println("Initial Turn: " +game.getCurrentTurn());
+        Position a1 = new Position(7, 0);
+        Position a4 = new Position(4, 0);
 
-        //white pawn E2 > E4
+        System.out.println("Rook A1 -> A4: " + game.isValidMove(a1, a4));
+
         Position e2 = new Position(6, 4);
         Position e4 = new Position(4, 4);
 
+        System.out.println("Pawn E2 -> E4: " + game.isValidMove(e2, e4));
+
         game.makeMove(e2, e4);
 
-        System.out.println("After White Move: " + game.getCurrentTurn());
+        Position d7 = new Position(1, 3);
+        Position d5 = new Position(3, 3);
 
-        //black pawn E7 > E5
-        Position e7 = new Position(1, 4);
-        Position e5 = new Position(3, 4);
+        game.makeMove(d7, d5);
 
-        game.makeMove(e7, e5);
+        System.out.println("Pawn E4 -> D5: " + game.isValidMove(e4, d5));
 
-        System.out.println("After Black Move: " + game.getCurrentTurn());
+        game.makeMove(e4, d5);
 
+        Piece piece = game.getPiece(d5);
 
-        try {
-            game.makeMove(e5, new Position(4, 4));
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-        }
+        System.out.println("Piece at D5: " + piece.getClass().getSimpleName());
 
-        System.out.println("Final Turn: " + game.getCurrentTurn());
+        System.out.println("Piece Color: " + piece.getColor());
+
+        System.out.println("Current Turn: " + game.getCurrentTurn());
     }
 
 }
