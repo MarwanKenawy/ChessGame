@@ -12,44 +12,40 @@ import ChessCore.Rook;
 
 public class Main {
     public static void main(String[] args){
+
         ChessGame game = new ChessGame();
 
-        //fool's mate
-        //F2 > F3
-        game.makeMove(new Position(6, 5), new Position(5, 5));
+        //E2 > E4
+        game.makeMove(new Position(6, 4), new Position(4, 4));
 
         //E7 > E5
         game.makeMove(new Position(1, 4), new Position(3, 4));
 
-        //G2 > G4
-        game.makeMove(new Position(6, 6), new Position(4, 6));
+        //G1 > F3
+        game.makeMove(new Position(7, 6), new Position(5, 5));
 
-        //D8 > H4
-        game.makeMove(new Position(0, 3), new Position(4, 7));
+        //B8 > C6
+        game.makeMove(new Position(0, 1), new Position(2, 2));
 
-        System.out.println("White in check: " + game.isKingInCheck(PieceColor.WHITE));
+        //F1 > C4
+        game.makeMove(new Position(7, 5), new Position(4, 2));
 
-        System.out.println("Checkmate: " + game.isCheckmate());
+        //G8 > F6
+        game.makeMove(new Position(0, 6), new Position(2, 5));
 
-        System.out.println("Game Status: " + game.getGameStatus());
-
-        //try move after game ended
-        // try {
-        //     game.makeMove(new Position(6, 0), new Position(5, 0));
-        // } catch (IllegalArgumentException e) {
-        //     System.out.println(e.getMessage());
-        // }
-
-        ChessGame game2 = new ChessGame();
-
+        Position e1 = new Position(7, 4);
         Position g1 = new Position(7, 6);
 
-        java.util.List<Position> moves = game2.getAllValidMovesFromSquare(g1);
-        System.out.println("Knight valid moves: " + moves.size());
+        System.out.println("Can castle: " + game.isValidMove(e1, g1));
 
-        for (Position move : moves) {
-            System.out.println("Row: " + move.getRow() + ", Col: " + move.getCol());
-        }
+        //O-O
+        game.makeMove(e1, g1);
+
+        System.out.println("King at G1: " + game.getPiece(g1).getClass().getSimpleName());
+
+        System.out.println("Rook at F1: " + game.getPiece(new Position(7, 5)).getClass().getSimpleName());
+
+        System.out.println("Current Turn: " + game.getCurrentTurn());
     }
 
 }

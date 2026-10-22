@@ -65,14 +65,28 @@ public class ChessGame {
 
     public boolean isValidMove(Position from, Position to){
 
+        if(from == null || to == null){
+            return false;
+        }
+
+        Piece piece = board.getPiece(from);
+
+        if(piece == null || piece.getColor() != currentTurn){
+            return false;
+        }
+
+        if(piece instanceof King && from.getRow() == to.getRow() && Math.abs(from.getCol() - to.getCol()) == 2){
+            return isValidCastling(from, to);
+        }
+
+
         if(!isPseudoLegalMove(from, to)){
             return false;
         }
 
-        Piece movingPiece = board.getPiece(from);
         Piece capturedPiece = board.getPiece(to);
 
-        board.setPiece(to, movingPiece);
+        board.setPiece(to, piece);
         board.setPiece(from, null);
 
         boolean kingInCheck;
@@ -80,7 +94,7 @@ public class ChessGame {
         try{
             kingInCheck = isKingInCheck(currentTurn);
         } finally {
-            board.setPiece(from, movingPiece);
+            board.setPiece(from, piece);
             board.setPiece(to, capturedPiece);
         }
 
@@ -99,8 +113,34 @@ public class ChessGame {
 
         Piece piece = board.getPiece(from);
 
-        board.setPiece(to, piece);
-        board.setPiece(from, null);
+        boolean castling = piece instanceof King && Math.abs(from.getCol() - to.getCol()) == 2;
+
+        if(castling){
+
+            int row = from.getRow();
+            boolean kingSide = to.getCol() == 6;
+
+            int rookFromCol = kingSide ? 7 : 0;
+            int rookToCol = kingSide ? 5 : 3;
+
+            Position rookFrom = new Position(row, rookFromCol);
+            Position rookTo = new Position(row, rookToCol);
+
+            Piece rook = board.getPiece(rookFrom);
+
+            board.setPiece(to, piece);
+            board.setPiece(from, null);
+            
+            board.setPiece(rookTo, rook);
+            board.setPiece(rookFrom, null);
+
+            rook.markAsMoved();;
+        }else{
+            board.setPiece(to, piece);
+            board.setPiece(from, null);
+        }
+
+        piece.markAsMoved();
 
         currentTurn = currentTurn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
 
@@ -290,5 +330,69 @@ public class ChessGame {
 
     public boolean isStalemate(){
         return !isKingInCheck(currentTurn) && !hasAnyValidMoves();
+    }
+
+    private boolean isValidCastling(Position from, Position to){
+
+        Piece king = board.getPiece(from);
+
+        if(!(king instanceof King) || king.hasMoved()){
+            return false;
+        }
+
+        int row = king.getColor() == PieceColor.WHITE ? 7 : 0;
+
+        if(from.getRow() != row || from.getCol() != 4){
+            return false;
+        }
+
+        if(to.getRow() != row){
+            return false;
+        }
+
+        if(to.getCol() != 2 && to.getCol() != 6){
+            return false;
+        }
+
+        boolean kingSide = to.getCol() == 6;
+
+        int rookCol = kingSide ? 7 : 0;
+
+        Position rookPosition = new Position(row, rookCol);
+        Piece rook = board.getPiece(rookPosition);
+
+        if(!(rook instanceof Rook) || rook.getColor() != king.getColor() || rook.hasMoved()){
+            return false;
+        }
+
+        int step = kingSide ? 1 : -1;
+
+        for(int col = 4 + step; col != rookCol; col += step){
+            if(!board.isEmpty(new Position(row, col))){
+                return false;
+            }
+        }
+
+        PieceColor opponent = king.getColor() == PieceColor.WHITE? PieceColor.BLACK : PieceColor.WHITE;
+
+        if(isSquareAttacked(from, opponent)){
+            return false;
+        }
+
+        Position intermediate = new Position(row, 4 + step);
+
+        Piece original = board.getPiece(from);
+
+        board.setPiece(from, null);
+
+        try{
+            if(isSquareAttacked(intermediate, opponent) || isSquareAttacked(to, opponent)){
+                return false;
+            }
+        }finally{
+            board.setPiece(from, original);
+        }
+
+        return true;
     }
 }
