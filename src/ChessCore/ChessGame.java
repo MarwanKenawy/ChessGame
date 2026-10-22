@@ -17,7 +17,7 @@ public class ChessGame {
         return board.getPiece(position);
     }
 
-    public boolean isValidMove(Position from, Position to){
+    public boolean isPseudoLegalMove(Position from, Position to){
         if(from == null || to == null){
             return false;
         }
@@ -55,6 +55,30 @@ public class ChessGame {
         }
 
         return isPathClear(from, to);
+    }
+
+    public boolean isValidMove(Position from, Position to){
+
+        if(!isPseudoLegalMove(from, to)){
+            return false;
+        }
+
+        Piece movingPiece = board.getPiece(from);
+        Piece capturedPiece = board.getPiece(to);
+
+        board.setPiece(to, movingPiece);
+        board.setPiece(from, null);
+
+        boolean kingInCheck;
+
+        try{
+            kingInCheck = isKingInCheck(currentTurn);
+        } finally {
+            board.setPiece(from, movingPiece);
+            board.setPiece(to, capturedPiece);
+        }
+
+        return !kingInCheck;
     }
 
     public void makeMove(Position from, Position to){
@@ -119,5 +143,82 @@ public class ChessGame {
         }
 
         return false;
+    }
+
+    private boolean isSquareAttacked(Position square, PieceColor attackerColor){
+        
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col < 8; col++){
+
+                Position from = new Position(row, col);
+                Piece piece = board.getPiece(from);
+
+                if(piece == null || piece.getColor() != attackerColor){
+                    continue;
+                }
+
+                if(piece instanceof Pawn){
+
+                    int direction = attackerColor == PieceColor.WHITE ? -1 : 1;
+
+                    int rowDiff = square.getRow() - row;
+                    int colDiff = Math.abs(square.getCol() - col);
+
+                    if(rowDiff == direction && colDiff == 1){
+                        return true;
+                    }
+
+                    continue;
+                }
+
+                if(!piece.isValidMove(from, square)){
+                    continue;
+                }
+
+                if(piece instanceof Knight){
+                    return true;
+                }
+
+                if(isPathClear(from, square)){
+                    return true;
+                }
+            }
+        }
+
+        return false;
+    }
+
+    public boolean isKingInCheck(PieceColor color){
+
+        if(color == null){
+            throw new IllegalArgumentException("King color cannot be null");
+        }
+
+        Position kingPosition = null;
+
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col < 8; col++){
+
+                Position position = new Position(row, col);
+                Piece piece = board.getPiece(position);
+
+                if(piece instanceof King && piece.getColor() == color){
+                    kingPosition = position;
+                    break;
+                }
+            }
+
+            if(kingPosition != null){
+                break;
+            }
+        }
+
+        if(kingPosition == null){
+            throw new IllegalArgumentException("King not found");
+        }
+
+        PieceColor opponent = color == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
+
+        return isSquareAttacked(kingPosition, opponent);
     }
 }

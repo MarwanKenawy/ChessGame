@@ -14,34 +14,31 @@ public class Main {
     public static void main(String[] args){
         ChessGame game = new ChessGame();
 
-        Position a1 = new Position(7, 0);
-        Position a4 = new Position(4, 0);
+        //fool's mate
+        //F2 > F3
+        game.makeMove(new Position(6, 5), new Position(5, 5));
 
-        System.out.println("Rook A1 -> A4: " + game.isValidMove(a1, a4));
+        //E7 > E5
+        game.makeMove(new Position(1, 4), new Position(3, 4));
 
-        Position e2 = new Position(6, 4);
-        Position e4 = new Position(4, 4);
+        //G2 > G4
+        game.makeMove(new Position(6, 6), new Position(4, 6));
 
-        System.out.println("Pawn E2 -> E4: " + game.isValidMove(e2, e4));
+        //D8 > H4
+        game.makeMove(new Position(0, 3), new Position(4, 7));
 
-        game.makeMove(e2, e4);
+        System.out.println("White in check: " + game.isKingInCheck(PieceColor.WHITE));
 
-        Position d7 = new Position(1, 3);
-        Position d5 = new Position(3, 3);
-
-        game.makeMove(d7, d5);
-
-        System.out.println("Pawn E4 -> D5: " + game.isValidMove(e4, d5));
-
-        game.makeMove(e4, d5);
-
-        Piece piece = game.getPiece(d5);
-
-        System.out.println("Piece at D5: " + piece.getClass().getSimpleName());
-
-        System.out.println("Piece Color: " + piece.getColor());
+        System.out.println("Black in check: " + game.isKingInCheck(PieceColor.BLACK));
 
         System.out.println("Current Turn: " + game.getCurrentTurn());
+
+        //try unrelated move while in check
+        try {
+            game.makeMove(new Position(6, 0), new Position(5, 0));
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
     }
 
 }
