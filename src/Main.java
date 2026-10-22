@@ -1,5 +1,6 @@
 import ChessCore.Bishop;
 import ChessCore.Board;
+import ChessCore.ChessGame;
 import ChessCore.King;
 import ChessCore.Knight;
 import ChessCore.Pawn;
@@ -11,31 +12,34 @@ import ChessCore.Rook;
 
 public class Main {
     public static void main(String[] args){
-        Board board = new Board();
+        ChessGame game = new ChessGame();
 
-        Position whiteKing = new Position(7, 4);
-        Position blackQueen = new Position(0, 3);
-        Position whitePawn = new Position(6, 4);
-        Position emptySquare = new Position(4, 4);
+        System.out.println("Initial Turn: " +game.getCurrentTurn());
 
-        Piece piece1 = board.getPiece(whiteKing);
-        Piece piece2 = board.getPiece(blackQueen);
-        Piece piece3 = board.getPiece(whitePawn);
+        //white pawn E2 > E4
+        Position e2 = new Position(6, 4);
+        Position e4 = new Position(4, 4);
 
-        System.out.println("White King: " +
-            piece1.getClass().getSimpleName());
+        game.makeMove(e2, e4);
 
-        System.out.println("Black Queen: " +
-            piece2.getClass().getSimpleName());
+        System.out.println("After White Move: " + game.getCurrentTurn());
 
-        System.out.println("White Pawn: " +
-            piece3.getClass().getSimpleName());
+        //black pawn E7 > E5
+        Position e7 = new Position(1, 4);
+        Position e5 = new Position(3, 4);
 
-        System.out.println("Empty Square: " +
-            board.isEmpty(emptySquare));
+        game.makeMove(e7, e5);
 
-        System.out.println("White King Color: " +
-            piece1.getColor());
+        System.out.println("After Black Move: " + game.getCurrentTurn());
+
+
+        try {
+            game.makeMove(e5, new Position(4, 4));
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
+
+        System.out.println("Final Turn: " + game.getCurrentTurn());
     }
 
 }
