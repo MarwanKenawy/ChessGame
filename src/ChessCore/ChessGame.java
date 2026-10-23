@@ -1,5 +1,7 @@
 package ChessCore;
 
+import java.util.ArrayList;
+
 public class ChessGame {
     private final Board board;
     private PieceColor currentTurn;
@@ -8,6 +10,18 @@ public class ChessGame {
 
     public ChessGame(){
         board = new Board();
+        currentTurn = PieceColor.WHITE;
+        gameStatus = GameStatus.IN_PROGRESS;
+        enPassantTarget = null;
+    }
+
+    //test
+    public ChessGame(Board customBoard){
+        if(customBoard == null){
+            throw new IllegalArgumentException("Board cannot be null");
+        }
+
+        board = customBoard;
         currentTurn = PieceColor.WHITE;
         gameStatus = GameStatus.IN_PROGRESS;
         enPassantTarget = null;
@@ -200,6 +214,8 @@ public class ChessGame {
             gameStatus = currentTurn == PieceColor.WHITE ? GameStatus.BLACK_WON : GameStatus.WHITE_WON;
         }else if(isStalemate()){
             gameStatus = GameStatus.STALEMATE;
+        }else if(isInsufficientMaterial()){
+            gameStatus = GameStatus.INSUFFICIENT_MATERIAL;
         }
     }
 
@@ -509,5 +525,61 @@ public class ChessGame {
         }
 
         return (piece.getColor() == PieceColor.WHITE && to.getRow() == 0) || (piece.getColor() == PieceColor.BLACK && to.getRow() == 7);
+    }
+
+    public boolean isInsufficientMaterial(){
+        java.util.List<Piece> whitePieces = new ArrayList<>();
+        java.util.List<Piece> blackPieces = new ArrayList<>();
+        java.util.List<Position> whitePositions = new ArrayList<>();
+        java.util.List<Position> blackPositions = new ArrayList<>();
+
+        for(int row = 0; row < 8; row++){
+            for(int col = 0; col < 8; col++){
+                Position position = new Position(row, col);
+                Piece piece = board.getPiece(position);
+
+                if(piece == null || piece instanceof King){
+                    continue;
+                }
+
+                if(piece instanceof Pawn || piece instanceof Rook || piece instanceof Queen){
+                    return false;
+                }
+
+                if(piece.getColor() == PieceColor.WHITE){
+                    whitePieces.add(piece);
+                    whitePositions.add(position);
+                }else{
+                    blackPieces.add(piece);
+                    blackPositions.add(position);
+                }
+            }
+        }
+
+        int whiteCount = whitePieces.size();
+        int blackCount = blackPieces.size();
+
+        if(whiteCount == 0 && blackCount == 0){
+            return true;
+        }
+
+        if(whiteCount == 1 && blackCount == 0){
+            return true;
+        }
+
+        if(whiteCount == 0 && blackCount == 1){
+            return true;
+        }
+
+        if(whiteCount == 1 && blackCount == 1 && whitePieces.get(0) instanceof Bishop && blackPieces.get(0) instanceof Bishop){
+            Position whiteBishop = whitePositions.get(0);
+            Position blackBishop = blackPositions.get(0);
+
+            int whiteSquareColor = (whiteBishop.getRow() + whiteBishop.getCol()) % 2;
+            int blackSquareColor = (blackBishop.getRow() + blackBishop.getCol()) % 2;
+
+            return whiteSquareColor == blackSquareColor;
+        }
+        return false;
     }
 }

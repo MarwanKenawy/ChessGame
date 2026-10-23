@@ -8,6 +8,20 @@ public class Board {
         initializeBoard();
     }
 
+    //test
+    public Board(boolean initializePieces){
+        squares = new Piece[8][8];
+        if(initializePieces){
+            Board standardBoard = new Board();
+
+            for(int row = 0; row < 8; row++){
+                for(int col = 0; col < 8; col++){
+                    squares[row][col] = standardBoard.getPiece(new Position(row, col));
+                }
+            }
+        }
+    }
+
     private void initializeBoard(){
 
         setupBackRank(0, PieceColor.BLACK);

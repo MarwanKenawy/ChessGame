@@ -1,67 +1,43 @@
-import ChessCore.Bishop;
-import ChessCore.Board;
-import ChessCore.ChessGame;
-import ChessCore.King;
-import ChessCore.Knight;
-import ChessCore.Pawn;
-import ChessCore.Piece;
-import ChessCore.PieceColor;
-import ChessCore.Position;
-import ChessCore.Queen;
-import ChessCore.Rook;
+import ChessCore.*;
 
 public class Main {
     public static void main(String[] args){
 
-        ChessGame game = new ChessGame();
+        // Test 1: King vs King
+        Board board1 = new Board(false);
 
-        //A2 > A4
-        game.makeMove(new Position(6, 0), new Position(4, 0));
+        board1.setPiece(new Position(7, 4), new King(PieceColor.WHITE));
 
-        //B7 > B5
-        game.makeMove(new Position(1, 1), new Position(3, 1));
+        board1.setPiece(new Position(0, 4), new King(PieceColor.BLACK));
 
-        //A4 > B5 (capture)
-        game.makeMove(new Position(4, 0), new Position(3, 1));
+        ChessGame game1 = new ChessGame(board1);
 
-        //A7 > A6
-        game.makeMove(new Position(1, 0), new Position(2, 0));
+        System.out.println("King vs King: " + game1.isInsufficientMaterial());
 
-        //B5 > B6
-        game.makeMove(new Position(3, 1), new Position(2, 1));
+        // Test 2: King + Bishop vs King
+        Board board2 = new Board(false);
 
-        //H7 > H6
-        game.makeMove(new Position(1, 7), new Position(2, 7));
+        board2.setPiece(new Position(7, 4),new King(PieceColor.WHITE));
 
-        //B6 > C7 (capture)
-        game.makeMove(new Position(2, 1), new Position(1, 2));
+        board2.setPiece(new Position(0, 4), new King(PieceColor.BLACK));
 
-        //H6 > H5
-        game.makeMove(new Position(2, 7), new Position(3, 7));
+        board2.setPiece(new Position(6, 2), new Bishop(PieceColor.WHITE));
 
-        Position c7 = new Position(1, 2);
-        Position b8 = new Position(0, 1);
+        ChessGame game2 = new ChessGame(board2);
 
-        //C7 > B8 = Queen (capture and promote)
-        System.out.println("Promotion move valid: " + game.isValidMove(c7, b8));
+        System.out.println("King + Bishop vs King: " + game2.isInsufficientMaterial());
 
-        // game.makeMove(c7, b8, 'Q');
-        try {
-            game.makeMove(c7, b8, 'X');
-        } catch (IllegalArgumentException e) {
-            System.out.println(e.getMessage());
-        }
+        // Test 3: King + Rook vs King
+        Board board3 = new Board(false);
 
-        System.out.println("Pawn still at C7: " + (game.getPiece(c7) instanceof Pawn));
+        board3.setPiece(new Position(7, 4), new King(PieceColor.WHITE));
 
-        Piece promotedPiece = game.getPiece(b8);
+        board3.setPiece(new Position(0, 4), new King(PieceColor.BLACK));
 
-        System.out.println("Promoted piece: " + promotedPiece.getClass().getSimpleName());
+        board3.setPiece(new Position(6, 0), new Rook(PieceColor.WHITE));
 
-        System.out.println("Piece color: " + promotedPiece.getColor());
+        ChessGame game3 = new ChessGame(board3);
 
-        System.out.println("C7 is empty: " + (game.getPiece(c7) == null));
-
-        System.out.println("Current Turn: " + game.getCurrentTurn());
+        System.out.println("King + Rook vs King: " + game3.isInsufficientMaterial());
     }
 }
