@@ -1,6 +1,11 @@
 package ChessCore;
 
+import ChessCore.pieces.*;
+import ChessCore.board.*;
+import ChessCore.enums.*;
+
 import java.util.ArrayList;
+import java.util.List;
 
 public class ChessGame {
     private final Board board;

@@ -1,4 +1,7 @@
-package ChessCore;
+package ChessCore.pieces;
+
+import ChessCore.board.Position;
+import ChessCore.enums.PieceColor;
 
 public class King extends Piece {
     

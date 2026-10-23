@@ -1,4 +1,8 @@
-import ChessCore.*;
+import ChessCore.ChessGame;
+import ChessCore.board.*;
+import ChessCore.pieces.*;
+import ChessCore.enums.*;
+
 import java.io.BufferedReader;
 import java.io.FileReader;
 import java.io.IOException;

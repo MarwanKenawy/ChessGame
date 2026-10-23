@@ -1,4 +1,4 @@
-package ChessCore;
+package ChessCore.board;
 
 public class Position {
     private final int row;

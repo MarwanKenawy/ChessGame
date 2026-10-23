@@ -1,4 +1,4 @@
-package ChessCore;
+package ChessCore.enums;
 
 public enum MoveEvent {
     NORMAL,

@@ -1,4 +1,7 @@
-package ChessCore;
+package ChessCore.board;
+
+import ChessCore.pieces.*;
+import ChessCore.enums.PieceColor;
 
 public class Board {
     private final Piece[][] squares;
