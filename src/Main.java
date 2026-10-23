@@ -18,32 +18,31 @@ public class Main {
         //E2 > E4
         game.makeMove(new Position(6, 4), new Position(4, 4));
 
-        //E7 > E5
-        game.makeMove(new Position(1, 4), new Position(3, 4));
+        //A7 > A6
+        game.makeMove(new Position(1, 0), new Position(2, 0));
 
-        //G1 > F3
-        game.makeMove(new Position(7, 6), new Position(5, 5));
+        //E4 > E5
+        game.makeMove(new Position(4, 4), new Position(3, 4));
 
-        //B8 > C6
-        game.makeMove(new Position(0, 1), new Position(2, 2));
+        //D7 > D5
+        game.makeMove(new Position(1, 3), new Position(3, 3));
 
-        //F1 > C4
-        game.makeMove(new Position(7, 5), new Position(4, 2));
+        Position e5 = new Position(3, 4);
+        Position d6 = new Position(2, 3);
+        Position d5 = new Position(3, 3);
 
-        //G8 > F6
-        game.makeMove(new Position(0, 6), new Position(2, 5));
+        System.out.println("En passant valid: " + game.isValidMove(e5, d6));
 
-        Position e1 = new Position(7, 4);
-        Position g1 = new Position(7, 6);
+        //E5 > D6 (en passant)
+        game.makeMove(e5, d6);
 
-        System.out.println("Can castle: " + game.isValidMove(e1, g1));
+        Piece whitePawn = game.getPiece(d6);
 
-        //O-O
-        game.makeMove(e1, g1);
+        System.out.println("Piece at D6: " + whitePawn.getClass().getSimpleName());
 
-        System.out.println("King at G1: " + game.getPiece(g1).getClass().getSimpleName());
+        System.out.println("Piece Color: " + whitePawn.getColor());
 
-        System.out.println("Rook at F1: " + game.getPiece(new Position(7, 5)).getClass().getSimpleName());
+        System.out.println("D5 is empty: " + (game.getPiece(d5) == null));
 
         System.out.println("Current Turn: " + game.getCurrentTurn());
     }

@@ -4,11 +4,13 @@ public class ChessGame {
     private final Board board;
     private PieceColor currentTurn;
     private GameStatus gameStatus;
+    private Position enPassantTarget;
 
     public ChessGame(){
         board = new Board();
         currentTurn = PieceColor.WHITE;
         gameStatus = GameStatus.IN_PROGRESS;
+        enPassantTarget = null;
     }
 
     public GameStatus getGameStatus(){
@@ -79,12 +81,28 @@ public class ChessGame {
             return isValidCastling(from, to);
         }
 
+        boolean enPassant = isValidEnPassant(from, to);
 
-        if(!isPseudoLegalMove(from, to)){
+        if(!enPassant && ! isPseudoLegalMove(from, to)){
             return false;
         }
 
+
+        // if(!isPseudoLegalMove(from, to)){
+        //     return false;
+        // }
+
         Piece capturedPiece = board.getPiece(to);
+
+        Position enPassantCapturedPosition = null;
+        Piece enPassantCapturedPiece = null;
+
+        if(enPassant){
+            enPassantCapturedPosition = new Position(from.getRow(), to.getCol());
+            enPassantCapturedPiece = board.getPiece(enPassantCapturedPosition);
+
+            board.setPiece(enPassantCapturedPosition, null);
+        }
 
         board.setPiece(to, piece);
         board.setPiece(from, null);
@@ -96,6 +114,10 @@ public class ChessGame {
         } finally {
             board.setPiece(from, piece);
             board.setPiece(to, capturedPiece);
+
+            if(enPassant){
+                board.setPiece(enPassantCapturedPosition, enPassantCapturedPiece);
+            }
         }
 
         return !kingInCheck;
@@ -115,6 +137,9 @@ public class ChessGame {
 
         boolean castling = piece instanceof King && Math.abs(from.getCol() - to.getCol()) == 2;
 
+        boolean enPassant = isValidEnPassant(from, to);
+        enPassantTarget = null;
+        
         if(castling){
 
             int row = from.getRow();
@@ -136,8 +161,19 @@ public class ChessGame {
 
             rook.markAsMoved();;
         }else{
+
+            if(enPassant){
+                Position capturedPosition = new Position(from.getRow(), to.getCol());
+                board.setPiece(capturedPosition, null);
+            }
             board.setPiece(to, piece);
             board.setPiece(from, null);
+
+            if(piece instanceof Pawn && Math.abs(to.getRow() - from.getRow()) == 2){
+                int middleRow = (from.getRow() + to.getRow()) / 2;
+
+                enPassantTarget = new Position(middleRow, from.getCol());
+            }
         }
 
         piece.markAsMoved();
@@ -394,5 +430,39 @@ public class ChessGame {
         }
 
         return true;
+    }
+
+    private boolean isValidEnPassant(Position from, Position to){
+        Piece piece = board.getPiece(from);
+
+        if(!(piece instanceof Pawn)){
+            return false;
+        }
+
+        if(enPassantTarget == null){
+            return false;
+        }
+
+        if(to.getRow() != enPassantTarget.getRow() || to.getCol() != enPassantTarget.getCol()){
+            return false;
+        }
+
+        int direction = piece.getColor() == PieceColor.WHITE ? -1 : 1;
+
+        int rowDiff = to.getRow() - from.getRow();
+        int colDiff = Math.abs(to.getCol() - from.getCol());
+
+        if(rowDiff != direction || colDiff != 1){
+            return false;
+        }
+
+        if(!board.isEmpty(to)){
+            return false;
+        }
+
+        Position capturedPosition = new Position(from.getRow(), to.getCol());
+        Piece capturedPiece = board.getPiece(capturedPosition);
+
+        return capturedPiece instanceof Pawn && capturedPiece.getColor() != piece.getColor();
     }
 }
