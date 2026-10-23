@@ -124,6 +124,10 @@ public class ChessGame {
     }
 
     public void makeMove(Position from, Position to){
+        makeMove(from, to, 'Q');
+    }
+
+    public void makeMove(Position from, Position to, char promotionChoice){
 
         if(gameStatus != GameStatus.IN_PROGRESS){
             throw new IllegalStateException("Game already ended");
@@ -131,6 +135,13 @@ public class ChessGame {
 
         if(!isValidMove(from, to)){
             throw new IllegalArgumentException("Invalid move");
+        }
+
+        boolean promotion = isPromotionMove(from, to);
+        Piece promotionPiece = null;
+
+        if(promotion){
+            promotionPiece = createPromotionPiece(promotionChoice, currentTurn);
         }
 
         Piece piece = board.getPiece(from);
@@ -166,7 +177,8 @@ public class ChessGame {
                 Position capturedPosition = new Position(from.getRow(), to.getCol());
                 board.setPiece(capturedPosition, null);
             }
-            board.setPiece(to, piece);
+
+            board.setPiece(to, promotion ? promotionPiece : piece);
             board.setPiece(from, null);
 
             if(piece instanceof Pawn && Math.abs(to.getRow() - from.getRow()) == 2){
@@ -177,6 +189,10 @@ public class ChessGame {
         }
 
         piece.markAsMoved();
+
+        if(promotion){
+            promotionPiece.markAsMoved();
+        }
 
         currentTurn = currentTurn == PieceColor.WHITE ? PieceColor.BLACK : PieceColor.WHITE;
 
@@ -464,5 +480,34 @@ public class ChessGame {
         Piece capturedPiece = board.getPiece(capturedPosition);
 
         return capturedPiece instanceof Pawn && capturedPiece.getColor() != piece.getColor();
+    }
+
+    private Piece createPromotionPiece(char promotionChoice, PieceColor color){
+        switch (Character.toUpperCase(promotionChoice)) {
+            case 'Q':
+                return new Queen(color);
+            case 'R':
+                return new Rook(color);
+            case 'B':
+                return new Bishop(color);
+            case 'K':
+                return new Knight(color);
+            default:
+                throw new IllegalArgumentException("Invalid promotion piece");
+        }
+    }
+
+    private boolean isPromotionMove(Position from, Position to){
+        if(from == null || to == null){
+            return false;
+        }
+
+        Piece piece = board.getPiece(from);
+
+        if(!(piece instanceof Pawn)){
+            return false;
+        }
+
+        return (piece.getColor() == PieceColor.WHITE && to.getRow() == 0) || (piece.getColor() == PieceColor.BLACK && to.getRow() == 7);
     }
 }

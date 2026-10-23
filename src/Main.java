@@ -15,36 +15,53 @@ public class Main {
 
         ChessGame game = new ChessGame();
 
-        //E2 > E4
-        game.makeMove(new Position(6, 4), new Position(4, 4));
+        //A2 > A4
+        game.makeMove(new Position(6, 0), new Position(4, 0));
+
+        //B7 > B5
+        game.makeMove(new Position(1, 1), new Position(3, 1));
+
+        //A4 > B5 (capture)
+        game.makeMove(new Position(4, 0), new Position(3, 1));
 
         //A7 > A6
         game.makeMove(new Position(1, 0), new Position(2, 0));
 
-        //E4 > E5
-        game.makeMove(new Position(4, 4), new Position(3, 4));
+        //B5 > B6
+        game.makeMove(new Position(3, 1), new Position(2, 1));
 
-        //D7 > D5
-        game.makeMove(new Position(1, 3), new Position(3, 3));
+        //H7 > H6
+        game.makeMove(new Position(1, 7), new Position(2, 7));
 
-        Position e5 = new Position(3, 4);
-        Position d6 = new Position(2, 3);
-        Position d5 = new Position(3, 3);
+        //B6 > C7 (capture)
+        game.makeMove(new Position(2, 1), new Position(1, 2));
 
-        System.out.println("En passant valid: " + game.isValidMove(e5, d6));
+        //H6 > H5
+        game.makeMove(new Position(2, 7), new Position(3, 7));
 
-        //E5 > D6 (en passant)
-        game.makeMove(e5, d6);
+        Position c7 = new Position(1, 2);
+        Position b8 = new Position(0, 1);
 
-        Piece whitePawn = game.getPiece(d6);
+        //C7 > B8 = Queen (capture and promote)
+        System.out.println("Promotion move valid: " + game.isValidMove(c7, b8));
 
-        System.out.println("Piece at D6: " + whitePawn.getClass().getSimpleName());
+        // game.makeMove(c7, b8, 'Q');
+        try {
+            game.makeMove(c7, b8, 'X');
+        } catch (IllegalArgumentException e) {
+            System.out.println(e.getMessage());
+        }
 
-        System.out.println("Piece Color: " + whitePawn.getColor());
+        System.out.println("Pawn still at C7: " + (game.getPiece(c7) instanceof Pawn));
 
-        System.out.println("D5 is empty: " + (game.getPiece(d5) == null));
+        Piece promotedPiece = game.getPiece(b8);
+
+        System.out.println("Promoted piece: " + promotedPiece.getClass().getSimpleName());
+
+        System.out.println("Piece color: " + promotedPiece.getColor());
+
+        System.out.println("C7 is empty: " + (game.getPiece(c7) == null));
 
         System.out.println("Current Turn: " + game.getCurrentTurn());
     }
-
 }
