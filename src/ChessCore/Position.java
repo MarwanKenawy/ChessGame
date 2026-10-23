@@ -20,4 +20,24 @@ public class Position {
     public int getCol(){
         return col;
     }
+
+    public static Position fromChessNotation(String notation){
+        if(notation == null || notation.length() != 2){
+            throw new IllegalArgumentException("Invalid position");
+        }
+
+        notation = notation.toUpperCase();
+
+        char file = notation.charAt(0);
+        char rank = notation.charAt(1);
+
+        if(file < 'A' || file > 'H' || rank < '1' || rank > '8'){
+            throw new IllegalArgumentException("Invalid position");
+        }
+
+        int col = file - 'A';
+        int row = 8 - (rank - '0');
+
+        return new Position(row, col);
+    }
 }

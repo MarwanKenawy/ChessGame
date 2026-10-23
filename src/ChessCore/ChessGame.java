@@ -7,6 +7,7 @@ public class ChessGame {
     private PieceColor currentTurn;
     private GameStatus gameStatus;
     private Position enPassantTarget;
+    private MoveEvent lastMoveEvent = MoveEvent.NORMAL;
 
     public ChessGame(){
         board = new Board();
@@ -25,6 +26,10 @@ public class ChessGame {
         currentTurn = PieceColor.WHITE;
         gameStatus = GameStatus.IN_PROGRESS;
         enPassantTarget = null;
+    }
+
+    public MoveEvent getLastMoveEvent(){
+        return lastMoveEvent;
     }
 
     public GameStatus getGameStatus(){
@@ -160,10 +165,24 @@ public class ChessGame {
 
         Piece piece = board.getPiece(from);
 
+        Piece destinationPiece = board.getPiece(to);
+        boolean wasCapture = destinationPiece != null;
+
         boolean castling = piece instanceof King && Math.abs(from.getCol() - to.getCol()) == 2;
 
         boolean enPassant = isValidEnPassant(from, to);
         enPassantTarget = null;
+
+        MoveEvent moveEvent;
+        if(castling){
+            moveEvent = MoveEvent.CASTLE;
+        }else if(enPassant){
+            moveEvent = MoveEvent.EN_PASSANT;
+        }else if(wasCapture){
+            moveEvent = MoveEvent.CAPTURE;
+        }else{
+            moveEvent = MoveEvent.NORMAL;
+        }
         
         if(castling){
 
@@ -217,6 +236,8 @@ public class ChessGame {
         }else if(isInsufficientMaterial()){
             gameStatus = GameStatus.INSUFFICIENT_MATERIAL;
         }
+
+        lastMoveEvent = moveEvent;
     }
 
     private boolean isPathClear(Position from, Position to){
