@@ -8,6 +8,7 @@ public class ChessGame {
     private GameStatus gameStatus;
     private Position enPassantTarget;
     private MoveEvent lastMoveEvent = MoveEvent.NORMAL;
+    private String lastCapturedPieceName = null;
 
     public ChessGame(){
         board = new Board();
@@ -28,6 +29,9 @@ public class ChessGame {
         enPassantTarget = null;
     }
 
+    public String getLastCapturedPieceName(){
+        return lastCapturedPieceName;
+    }
     public MoveEvent getLastMoveEvent(){
         return lastMoveEvent;
     }
@@ -173,6 +177,12 @@ public class ChessGame {
         boolean enPassant = isValidEnPassant(from, to);
         enPassantTarget = null;
 
+        Piece capturedPiece = destinationPiece;
+        if(enPassant){
+            Position capturedPosition = new Position(from.getRow(), to.getCol());
+            capturedPiece = board.getPiece(capturedPosition);
+        }
+
         MoveEvent moveEvent;
         if(castling){
             moveEvent = MoveEvent.CASTLE;
@@ -238,6 +248,8 @@ public class ChessGame {
         }
 
         lastMoveEvent = moveEvent;
+
+        lastCapturedPieceName = capturedPiece == null ? null : capturedPiece.getClass().getSimpleName();
     }
 
     private boolean isPathClear(Position from, Position to){

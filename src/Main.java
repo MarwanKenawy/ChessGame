@@ -45,76 +45,37 @@ public class Main {
                     }else if(event == MoveEvent.EN_PASSANT){
                         System.out.println("Enpassant");
                     }else if(event == MoveEvent.CAPTURE){
-                        System.out.println("Capture");
+                        System.out.println("Captured " + game.getLastCapturedPieceName());
                     }
 
-                    if(game.getGameStatus() == GameStatus.IN_PROGRESS && game.isKingInCheck(game.getCurrentTurn())){
-                        if(game.getCurrentTurn() == PieceColor.WHITE){
-                            System.out.println("White in check");
-                        }else{
-                            System.out.println("Black in check");
+                    GameStatus status = game.getGameStatus();
+                    if(status == GameStatus.WHITE_WON){
+                        System.out.println("White Won");
+                    }else if(status == GameStatus.BLACK_WON){
+                        System.out.println("Black Won");
+                    }else{
+                        if(game.isKingInCheck(game.getCurrentTurn())){
+                            if(game.getCurrentTurn() == PieceColor.WHITE){
+                                System.out.println("White in check");
+                            }else{
+                                System.out.println("Black in check");
+                            }
+                        }
+                        
+                        if(status == GameStatus.STALEMATE){
+                            System.out.println("Stalemate");
+                        }else if(status == GameStatus.INSUFFICIENT_MATERIAL){
+                            System.out.println("Insufficient Material");
                         }
                     }
-
-                    switch (game.getGameStatus()) {
-                        case WHITE_WON:
-                            System.out.println("White Won");
-                            break;
-                        case BLACK_WON:    
-                            System.out.println("Black Won");
-                            break;
-                        case STALEMATE:    
-                            System.out.println("Stalemate");
-                            break;
-                        case INSUFFICIENT_MATERIAL:    
-                            System.out.println("Insufficient Material");
-                            break;
-                        default:
-                            break;
-                    }
-                }catch(IllegalArgumentException | IllegalStateException e){
-                    System.out.println(e);
+                }catch(IllegalArgumentException e){
+                    System.out.println("Invalid move");
+                }catch(IllegalStateException e){
+                    System.out.println(e.getMessage());
                 }
             }
         }catch(IOException e){
             System.err.println("Error reading ChessGame.txt: " + e.getMessage());
         }
-
-        // // Test 1: King vs King
-        // Board board1 = new Board(false);
-
-        // board1.setPiece(new Position(7, 4), new King(PieceColor.WHITE));
-
-        // board1.setPiece(new Position(0, 4), new King(PieceColor.BLACK));
-
-        // ChessGame game1 = new ChessGame(board1);
-
-        // System.out.println("King vs King: " + game1.isInsufficientMaterial());
-
-        // // Test 2: King + Bishop vs King
-        // Board board2 = new Board(false);
-
-        // board2.setPiece(new Position(7, 4),new King(PieceColor.WHITE));
-
-        // board2.setPiece(new Position(0, 4), new King(PieceColor.BLACK));
-
-        // board2.setPiece(new Position(6, 2), new Bishop(PieceColor.WHITE));
-
-        // ChessGame game2 = new ChessGame(board2);
-
-        // System.out.println("King + Bishop vs King: " + game2.isInsufficientMaterial());
-
-        // // Test 3: King + Rook vs King
-        // Board board3 = new Board(false);
-
-        // board3.setPiece(new Position(7, 4), new King(PieceColor.WHITE));
-
-        // board3.setPiece(new Position(0, 4), new King(PieceColor.BLACK));
-
-        // board3.setPiece(new Position(6, 0), new Rook(PieceColor.WHITE));
-
-        // ChessGame game3 = new ChessGame(board3);
-
-        // System.out.println("King + Rook vs King: " + game3.isInsufficientMaterial());
     }
 }
