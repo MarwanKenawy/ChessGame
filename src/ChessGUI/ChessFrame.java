@@ -16,6 +16,9 @@ public class ChessFrame extends JFrame {
     private final Color lightSquare = new Color(240, 217, 181);
     private final Color darkSquare = new Color(181, 136, 99);
 
+    private Position selectedPosition = null;
+    private java.util.List<Position> legalMoves = new java.util.ArrayList<>();
+
     public ChessFrame(){
 
         game = new ChessGame();
@@ -37,6 +40,12 @@ public class ChessFrame extends JFrame {
 
                 square.setBackground((row + col) % 2 == 0 ? lightSquare : darkSquare);
                 squares[row][col] = square;
+
+                final int r = row;
+                final int c = col;
+
+                square.addActionListener(e -> handleSquareClick(r, c));
+
                 boardPanel.add(square);
             }
         }
@@ -59,6 +68,21 @@ public class ChessFrame extends JFrame {
                 Piece piece = game.getPiece(position);
 
                 squares[row][col].setText(getPieceSymbol(piece));
+
+                Color squareColor = (row + col) % 2 == 0 ? lightSquare : darkSquare;
+
+                if(selectedPosition != null && selectedPosition.getRow() == row && selectedPosition.getCol() == col){
+                    squareColor = new Color(246, 246, 105);
+                }else{
+                    for(Position move : legalMoves){
+                        if(move.getRow() == row && move.getCol() == col){
+                            squareColor = new Color(130, 200, 100);
+                            break;
+                        }
+                    }
+                }
+
+                squares[row][col].setBackground(squareColor);
             }
         }
     }
@@ -95,5 +119,49 @@ public class ChessFrame extends JFrame {
         }
 
         return "";
+    }
+
+    private void handleSquareClick(int row, int col){
+        Position clickedPosition = new Position(row, col);
+        Piece clickedPiece = game.getPiece(clickedPosition);
+
+        if(selectedPosition == null){
+            if(clickedPiece != null && clickedPiece.getColor() == game.getCurrentTurn()){
+                selectedPosition = clickedPosition;
+                legalMoves = game.getAllValidMovesFromSquare(selectedPosition);
+                refreshBoard();
+            }
+            return;
+        }
+        
+        if(selectedPosition.getRow() == row && selectedPosition.getCol() == col){
+            selectedPosition = null;
+            legalMoves.clear();
+            refreshBoard();
+            return;
+        }
+
+        if(clickedPiece != null && clickedPiece.getColor() == game.getCurrentTurn()){
+            selectedPosition = clickedPosition;
+            legalMoves = game.getAllValidMovesFromSquare(selectedPosition);
+            refreshBoard();
+            return;
+        }
+
+        for(Position move : legalMoves){
+            if(move.getRow() == row && move.getCol() == col){
+                try{
+                    game.makeMove(selectedPosition, clickedPosition);
+
+                    selectedPosition = null;
+                    legalMoves.clear();
+                }catch(IllegalArgumentException | IllegalStateException ex){
+                    JOptionPane.showMessageDialog(this, ex.getMessage(), "Invalid Move", JOptionPane.WARNING_MESSAGE);
+                }
+
+                refreshBoard();
+                return;
+            }
+        }
     }
 }
