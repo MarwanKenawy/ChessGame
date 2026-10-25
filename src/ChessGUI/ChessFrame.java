@@ -2,6 +2,7 @@ package ChessGUI;
 
 import ChessCore.ChessGame;
 import ChessCore.board.Position;
+import ChessCore.enums.GameStatus;
 import ChessCore.enums.PieceColor;
 import ChessCore.pieces.*;
 
@@ -18,6 +19,7 @@ public class ChessFrame extends JFrame {
 
     private Position selectedPosition = null;
     private java.util.List<Position> legalMoves = new java.util.ArrayList<>();
+    private final JLabel turnLabel = new JLabel();
 
     public ChessFrame(){
 
@@ -50,6 +52,11 @@ public class ChessFrame extends JFrame {
             }
         }
 
+        turnLabel.setHorizontalAlignment(SwingConstants.CENTER);
+        turnLabel.setFont(new Font("Arial", Font.BOLD, 18));
+        turnLabel.setBorder(BorderFactory.createEmptyBorder(10, 0, 10, 0));
+
+        add(turnLabel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
 
         refreshBoard();
@@ -84,6 +91,13 @@ public class ChessFrame extends JFrame {
 
                 squares[row][col].setBackground(squareColor);
             }
+        }
+
+        turnLabel.setText(game.getCurrentTurn() == PieceColor.WHITE ? "White to move" : "Black to move");
+
+        if(game.getGameStatus() != GameStatus.IN_PROGRESS){
+            String message = game.getGameStatus().toString().replace("_", " ");
+            JOptionPane.showMessageDialog(this, "Game over: " + message, "Game Finished", JOptionPane.INFORMATION_MESSAGE);
         }
     }
 
