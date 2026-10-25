@@ -20,6 +20,7 @@ public class ChessFrame extends JFrame {
     private Position selectedPosition = null;
     private java.util.List<Position> legalMoves = new java.util.ArrayList<>();
     private final JLabel turnLabel = new JLabel();
+    private boolean boardFlipped = false;
 
     public ChessFrame(){
 
@@ -71,19 +72,23 @@ public class ChessFrame extends JFrame {
         for(int row = 0; row < 8; row++){
             for(int col = 0; col < 8; col ++){
 
-                Position position = new Position(row, col);
+                Position position = getBoardPosition(row, col);
                 Piece piece = game.getPiece(position);
 
                 squares[row][col].setText(getPieceSymbol(piece));
 
                 Color squareColor = (row + col) % 2 == 0 ? lightSquare : darkSquare;
+   
+                if(isKingInCheckAt(position)){
+                    squareColor = Color.RED;
+                }
 
-                if(selectedPosition != null && selectedPosition.getRow() == row && selectedPosition.getCol() == col){
-                    squareColor = new Color(246, 246, 105);
+                if(selectedPosition != null && selectedPosition.getRow() == position.getRow() && selectedPosition.getCol() == position.getCol()){
+                    squareColor = new Color(246, 246, 105);  //yellow
                 }else{
                     for(Position move : legalMoves){
-                        if(move.getRow() == row && move.getCol() == col){
-                            squareColor = new Color(130, 200, 100);
+                        if(move.getRow() == position.getRow() && move.getCol() == position.getCol()){
+                            squareColor = new Color(130, 200, 100);  //green
                             break;
                         }
                     }
@@ -136,7 +141,7 @@ public class ChessFrame extends JFrame {
     }
 
     private void handleSquareClick(int row, int col){
-        Position clickedPosition = new Position(row, col);
+        Position clickedPosition = getBoardPosition(row, col);
         Piece clickedPiece = game.getPiece(clickedPosition);
 
         if(selectedPosition == null){
@@ -148,7 +153,7 @@ public class ChessFrame extends JFrame {
             return;
         }
         
-        if(selectedPosition.getRow() == row && selectedPosition.getCol() == col){
+        if(selectedPosition.getRow() == clickedPosition.getRow() && selectedPosition.getCol() == clickedPosition.getCol()){
             selectedPosition = null;
             legalMoves.clear();
             refreshBoard();
@@ -163,9 +168,10 @@ public class ChessFrame extends JFrame {
         }
 
         for(Position move : legalMoves){
-            if(move.getRow() == row && move.getCol() == col){
+            if(move.getRow() == clickedPosition.getRow() && move.getCol() == clickedPosition.getCol()){
                 try{
                     game.makeMove(selectedPosition, clickedPosition);
+                    boardFlipped = !boardFlipped;
 
                     selectedPosition = null;
                     legalMoves.clear();
@@ -177,5 +183,19 @@ public class ChessFrame extends JFrame {
                 return;
             }
         }
+    }
+
+    private boolean isKingInCheckAt(Position position){
+        Piece piece = game.getPiece(position);
+
+        return piece instanceof King && game.isKingInCheck(piece.getColor());
+    }
+
+    private Position getBoardPosition(int displayRow, int displayCol){
+        if(boardFlipped){
+            return new Position(7 - displayRow, 7 - displayCol);
+        }
+
+        return new Position(displayRow, displayCol);
     }
 }
