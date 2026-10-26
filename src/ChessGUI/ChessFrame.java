@@ -21,6 +21,7 @@ public class ChessFrame extends JFrame {
     private java.util.List<Position> legalMoves = new java.util.ArrayList<>();
     private final JLabel turnLabel = new JLabel();
     private boolean boardFlipped = false;
+    private final JButton undoButton = new JButton("Undo");
 
     public ChessFrame(){
 
@@ -59,6 +60,11 @@ public class ChessFrame extends JFrame {
 
         add(turnLabel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(undoButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+        undoButton.addActionListener(e -> undoMove());
 
         refreshBoard();
 
@@ -197,5 +203,21 @@ public class ChessFrame extends JFrame {
         }
 
         return new Position(displayRow, displayCol);
+    }
+
+    private void undoMove(){
+        boolean undone = game.undoLastMove();
+
+        if(!undone){
+            JOptionPane.showMessageDialog(this, "There are no moves to undo.", "Undo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        selectedPosition = null;
+        legalMoves.clear();
+
+        boardFlipped = !boardFlipped;
+
+        refreshBoard();
     }
 }
