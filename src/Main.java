@@ -1,6 +1,5 @@
 import ChessCore.ChessGame;
 import ChessCore.board.*;
-import ChessCore.pieces.*;
 import ChessCore.enums.*;
 
 import java.io.BufferedReader;

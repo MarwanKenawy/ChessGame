@@ -5,7 +5,6 @@ import ChessCore.board.*;
 import ChessCore.enums.*;
 
 import java.util.ArrayList;
-import java.util.List;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.IdentityHashMap;
