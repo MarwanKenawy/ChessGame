@@ -6,6 +6,10 @@ import ChessCore.enums.*;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.ArrayDeque;
+import java.util.Deque;
+import java.util.IdentityHashMap;
+import java.util.Map;
 
 public class ChessGame {
     private final Board board;
@@ -14,6 +18,7 @@ public class ChessGame {
     private Position enPassantTarget;
     private MoveEvent lastMoveEvent = MoveEvent.NORMAL;
     private String lastCapturedPieceName = null;
+    private final Deque<GameStateSnapshot> moveHistory = new ArrayDeque<>();
 
     public ChessGame(){
         board = new Board();
@@ -171,6 +176,7 @@ public class ChessGame {
         if(promotion){
             promotionPiece = createPromotionPiece(promotionChoice, currentTurn);
         }
+        moveHistory.push(new GameStateSnapshot(this));
 
         Piece piece = board.getPiece(from);
 
@@ -620,4 +626,69 @@ public class ChessGame {
         }
         return false;
     }
+
+    public boolean undoLastMove(){
+        if(moveHistory.isEmpty()){
+            return false;
+        }
+
+        GameStateSnapshot previousState = moveHistory.pop();
+        previousState.restore(this);
+
+        return true;
+    }
+
+    private static class GameStateSnapshot {
+        private final Piece[][] pieces = new Piece[8][8];
+        private final Map<Piece, Boolean> movedStates = new IdentityHashMap<>();
+        
+        private final PieceColor currentTurn;
+        private final GameStatus gameStatus;
+        private final Position enPassantTarget;
+        private final MoveEvent lasMoveEvent;
+        private final String lastCapturedPieceName;
+
+        private GameStateSnapshot(ChessGame game){
+            currentTurn = game.currentTurn;
+            gameStatus = game.gameStatus;
+            enPassantTarget = game.enPassantTarget;
+            lasMoveEvent = game.lastMoveEvent;
+            lastCapturedPieceName = game.lastCapturedPieceName;
+
+            for(int row = 0; row < 8; row++){
+                for(int col = 0; col < 8; col++){
+                    Position position = new Position(row, col);
+                    Piece piece = game.board.getPiece(position);
+
+                    pieces[row][col] = piece;
+                    if(piece != null){
+                        movedStates.put(piece, piece.hasMoved());
+                    }
+                }
+            }
+        }
+
+        private void restore(ChessGame game){
+            for(int row = 0; row < 8; row++){
+                for(int col = 0; col < 8; col++){
+                    Position position = new Position(row, col);
+                    Piece piece = pieces[row][col];
+
+                    game.board.setPiece(position, piece);
+
+                    if(piece != null){
+                        piece.restoreMovedState(movedStates.get(piece));
+                    }
+                }
+            }
+
+            game.currentTurn = currentTurn;
+            game.gameStatus = gameStatus;
+            game.enPassantTarget = enPassantTarget;
+            game.lastMoveEvent = lasMoveEvent;
+            game.lastCapturedPieceName = lastCapturedPieceName;
+        }
+    }
 }
+
+

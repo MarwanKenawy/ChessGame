@@ -27,5 +27,9 @@ public abstract class Piece{
         hasMoved = true;
     }
 
+    public void restoreMovedState(boolean moved){
+        hasMoved = moved;
+    }
+
     public abstract boolean isValidMove(Position from, Position to);
 }
