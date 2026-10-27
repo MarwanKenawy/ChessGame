@@ -21,6 +21,7 @@ public class ChessFrame extends JFrame {
     private java.util.List<Position> legalMoves = new java.util.ArrayList<>();
     private final JLabel turnLabel = new JLabel();
     private boolean boardFlipped = false;
+    private final JButton undoButton = new JButton("Undo");
 
     public ChessFrame(){
 
@@ -59,6 +60,11 @@ public class ChessFrame extends JFrame {
 
         add(turnLabel, BorderLayout.NORTH);
         add(boardPanel, BorderLayout.CENTER);
+
+        JPanel bottomPanel = new JPanel();
+        bottomPanel.add(undoButton);
+        add(bottomPanel, BorderLayout.SOUTH);
+        undoButton.addActionListener(e -> undoMove());
 
         refreshBoard();
 
@@ -170,7 +176,13 @@ public class ChessFrame extends JFrame {
         for(Position move : legalMoves){
             if(move.getRow() == clickedPosition.getRow() && move.getCol() == clickedPosition.getCol()){
                 try{
-                    game.makeMove(selectedPosition, clickedPosition);
+                    Piece movingPiece = game.getPiece(selectedPosition);
+                    if(movingPiece instanceof Pawn && ((movingPiece.getColor() == PieceColor.WHITE && clickedPosition.getRow() == 0) || (movingPiece.getColor() == PieceColor.BLACK && clickedPosition.getRow() == 7))){
+                        char promotionChoice = askPromotionPiece();
+                        game.makeMove(selectedPosition, clickedPosition, promotionChoice);
+                    }else{
+                        game.makeMove(selectedPosition, clickedPosition);
+                    }
                     boardFlipped = !boardFlipped;
 
                     selectedPosition = null;
@@ -197,5 +209,38 @@ public class ChessFrame extends JFrame {
         }
 
         return new Position(displayRow, displayCol);
+    }
+
+    private char askPromotionPiece(){
+        String[] choices = {"Queen", "Rook", "Bishop", "Knight"};
+        int choice = JOptionPane.showOptionDialog(this, "Choose the piece for pawn promotion:", "Pawn Promotion", JOptionPane.DEFAULT_OPTION, JOptionPane.QUESTION_MESSAGE, null, choices, choices[0]);
+        switch (choice) {
+            case 0:
+                return 'Q';
+            case 1:
+                return 'R';
+            case 2:
+                return 'B';
+            case 3:
+                return 'K';
+            default:
+                return 'Q';
+        }
+    }
+
+    private void undoMove(){
+        boolean undone = game.undoLastMove();
+
+        if(!undone){
+            JOptionPane.showMessageDialog(this, "There are no moves to undo.", "Undo", JOptionPane.INFORMATION_MESSAGE);
+            return;
+        }
+
+        selectedPosition = null;
+        legalMoves.clear();
+
+        boardFlipped = !boardFlipped;
+
+        refreshBoard();
     }
 }
