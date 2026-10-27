@@ -173,7 +173,7 @@ public class ChessGame {
         Piece promotionPiece = null;
 
         if(promotion){
-            promotionPiece = createPromotionPiece(promotionChoice, currentTurn);
+            promotionPiece = PieceFactory.createPromotionPiece(promotionChoice, currentTurn);
         }
         moveHistory.push(new GameStateSnapshot(this));
 
@@ -539,21 +539,6 @@ public class ChessGame {
         Piece capturedPiece = board.getPiece(capturedPosition);
 
         return capturedPiece instanceof Pawn && capturedPiece.getColor() != piece.getColor();
-    }
-
-    private Piece createPromotionPiece(char promotionChoice, PieceColor color){
-        switch (Character.toUpperCase(promotionChoice)) {
-            case 'Q':
-                return new Queen(color);
-            case 'R':
-                return new Rook(color);
-            case 'B':
-                return new Bishop(color);
-            case 'K':
-                return new Knight(color);
-            default:
-                throw new IllegalArgumentException("Invalid promotion piece");
-        }
     }
 
     private boolean isPromotionMove(Position from, Position to){
