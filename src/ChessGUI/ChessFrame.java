@@ -1,6 +1,7 @@
 package ChessGUI;
 
 import ChessCore.ChessGame;
+import ChessCore.ChessGameObserver;
 import ChessCore.board.Position;
 import ChessCore.enums.GameStatus;
 import ChessCore.enums.PieceColor;
@@ -9,7 +10,7 @@ import ChessCore.pieces.*;
 import javax.swing.*;
 import java.awt.*;
 
-public class ChessFrame extends JFrame {
+public class ChessFrame extends JFrame implements ChessGameObserver {
     
     private final ChessGame game;
     private final JButton[][] squares = new JButton[8][8];
@@ -26,6 +27,8 @@ public class ChessFrame extends JFrame {
     public ChessFrame(){
 
         game = new ChessGame();
+
+        game.addObserver(this);
 
         setTitle("Chess Game");
         setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
@@ -177,21 +180,22 @@ public class ChessFrame extends JFrame {
             if(move.getRow() == clickedPosition.getRow() && move.getCol() == clickedPosition.getCol()){
                 try{
                     Piece movingPiece = game.getPiece(selectedPosition);
-                    if(movingPiece instanceof Pawn && ((movingPiece.getColor() == PieceColor.WHITE && clickedPosition.getRow() == 0) || (movingPiece.getColor() == PieceColor.BLACK && clickedPosition.getRow() == 7))){
-                        char promotionChoice = askPromotionPiece();
-                        game.makeMove(selectedPosition, clickedPosition, promotionChoice);
-                    }else{
-                        game.makeMove(selectedPosition, clickedPosition);
-                    }
+                    Position pos = selectedPosition;
+                    
                     boardFlipped = !boardFlipped;
-
                     selectedPosition = null;
                     legalMoves.clear();
+                    if(movingPiece instanceof Pawn && ((movingPiece.getColor() == PieceColor.WHITE && clickedPosition.getRow() == 0) || (movingPiece.getColor() == PieceColor.BLACK && clickedPosition.getRow() == 7))){
+                        char promotionChoice = askPromotionPiece();
+                        game.makeMove(pos, clickedPosition, promotionChoice);
+                    }else{
+                        game.makeMove(pos, clickedPosition);
+                    }
                 }catch(IllegalArgumentException | IllegalStateException ex){
+                    boardFlipped = !boardFlipped;
                     JOptionPane.showMessageDialog(this, ex.getMessage(), "Invalid Move", JOptionPane.WARNING_MESSAGE);
                 }
 
-                refreshBoard();
                 return;
             }
         }
@@ -229,18 +233,19 @@ public class ChessFrame extends JFrame {
     }
 
     private void undoMove(){
-        boolean undone = game.undoLastMove();
-
-        if(!undone){
+        if(!game.canUndo()){
             JOptionPane.showMessageDialog(this, "There are no moves to undo.", "Undo", JOptionPane.INFORMATION_MESSAGE);
             return;
         }
-
+        boardFlipped = !boardFlipped;
         selectedPosition = null;
         legalMoves.clear();
 
-        boardFlipped = !boardFlipped;
+        game.undoLastMove();
+    }
 
+    @Override 
+    public void onGameStateChanged(){
         refreshBoard();
     }
 }

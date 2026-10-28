@@ -5,6 +5,7 @@ import ChessCore.board.*;
 import ChessCore.enums.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.IdentityHashMap;
@@ -18,6 +19,7 @@ public class ChessGame {
     private MoveEvent lastMoveEvent = MoveEvent.NORMAL;
     private String lastCapturedPieceName = null;
     private final Deque<GameStateSnapshot> moveHistory = new ArrayDeque<>();
+    private final List<ChessGameObserver> observers = new ArrayList<>();
 
     public ChessGame(){
         board = new Board();
@@ -173,7 +175,7 @@ public class ChessGame {
         Piece promotionPiece = null;
 
         if(promotion){
-            promotionPiece = createPromotionPiece(promotionChoice, currentTurn);
+            promotionPiece = PieceFactory.createPromotionPiece(promotionChoice, currentTurn);
         }
         moveHistory.push(new GameStateSnapshot(this));
 
@@ -223,7 +225,7 @@ public class ChessGame {
             board.setPiece(rookTo, rook);
             board.setPiece(rookFrom, null);
 
-            rook.markAsMoved();;
+            rook.markAsMoved();
         }else{
 
             if(enPassant){
@@ -260,6 +262,7 @@ public class ChessGame {
         lastMoveEvent = moveEvent;
 
         lastCapturedPieceName = capturedPiece == null ? null : capturedPiece.getClass().getSimpleName();
+        notifyObservers();
     }
 
     private boolean isPathClear(Position from, Position to){
@@ -541,21 +544,6 @@ public class ChessGame {
         return capturedPiece instanceof Pawn && capturedPiece.getColor() != piece.getColor();
     }
 
-    private Piece createPromotionPiece(char promotionChoice, PieceColor color){
-        switch (Character.toUpperCase(promotionChoice)) {
-            case 'Q':
-                return new Queen(color);
-            case 'R':
-                return new Rook(color);
-            case 'B':
-                return new Bishop(color);
-            case 'K':
-                return new Knight(color);
-            default:
-                throw new IllegalArgumentException("Invalid promotion piece");
-        }
-    }
-
     private boolean isPromotionMove(Position from, Position to){
         if(from == null || to == null){
             return false;
@@ -634,7 +622,11 @@ public class ChessGame {
         GameStateSnapshot previousState = moveHistory.pop();
         previousState.restore(this);
 
+        notifyObservers();
         return true;
+    }
+    public boolean canUndo(){
+        return !moveHistory.isEmpty();
     }
 
     private static class GameStateSnapshot {
@@ -686,6 +678,20 @@ public class ChessGame {
             game.enPassantTarget = enPassantTarget;
             game.lastMoveEvent = lasMoveEvent;
             game.lastCapturedPieceName = lastCapturedPieceName;
+        }
+    }
+
+    public void addObserver(ChessGameObserver observer){
+        if(observer != null && !observers.contains(observer)){
+            observers.add(observer);
+        }
+    }
+    public void removeObserver(ChessGameObserver observer){
+        observers.remove(observer);
+    }
+    private void notifyObservers(){
+        for(ChessGameObserver observer : observers){
+            observer.onGameStateChanged();
         }
     }
 }
