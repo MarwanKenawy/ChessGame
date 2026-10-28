@@ -5,6 +5,7 @@ import ChessCore.board.*;
 import ChessCore.enums.*;
 
 import java.util.ArrayList;
+import java.util.List;
 import java.util.ArrayDeque;
 import java.util.Deque;
 import java.util.IdentityHashMap;
@@ -18,6 +19,7 @@ public class ChessGame {
     private MoveEvent lastMoveEvent = MoveEvent.NORMAL;
     private String lastCapturedPieceName = null;
     private final Deque<GameStateSnapshot> moveHistory = new ArrayDeque<>();
+    private final List<ChessGameObserver> observers = new ArrayList<>();
 
     public ChessGame(){
         board = new Board();
@@ -223,7 +225,7 @@ public class ChessGame {
             board.setPiece(rookTo, rook);
             board.setPiece(rookFrom, null);
 
-            rook.markAsMoved();;
+            rook.markAsMoved();
         }else{
 
             if(enPassant){
@@ -260,6 +262,7 @@ public class ChessGame {
         lastMoveEvent = moveEvent;
 
         lastCapturedPieceName = capturedPiece == null ? null : capturedPiece.getClass().getSimpleName();
+        notifyObservers();
     }
 
     private boolean isPathClear(Position from, Position to){
@@ -619,7 +622,11 @@ public class ChessGame {
         GameStateSnapshot previousState = moveHistory.pop();
         previousState.restore(this);
 
+        notifyObservers();
         return true;
+    }
+    public boolean canUndo(){
+        return !moveHistory.isEmpty();
     }
 
     private static class GameStateSnapshot {
@@ -671,6 +678,20 @@ public class ChessGame {
             game.enPassantTarget = enPassantTarget;
             game.lastMoveEvent = lasMoveEvent;
             game.lastCapturedPieceName = lastCapturedPieceName;
+        }
+    }
+
+    public void addObserver(ChessGameObserver observer){
+        if(observer != null && !observers.contains(observer)){
+            observers.add(observer);
+        }
+    }
+    public void removeObserver(ChessGameObserver observer){
+        observers.remove(observer);
+    }
+    private void notifyObservers(){
+        for(ChessGameObserver observer : observers){
+            observer.onGameStateChanged();
         }
     }
 }
